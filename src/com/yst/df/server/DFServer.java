@@ -7,7 +7,6 @@ import java.util.concurrent.BlockingQueue;
 
 import org.apache.mina.core.service.IoAcceptor;
 import org.apache.mina.core.session.IdleStatus;
-import org.apache.mina.example.tapedeck.CommandDecoder;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
 import org.apache.mina.filter.logging.LoggingFilter;
@@ -29,10 +28,10 @@ public class DFServer implements Runnable {
 		IoAcceptor accptor = new NioSocketAcceptor();
 		accptor.getFilterChain().addLast("logger", new LoggingFilter());
 		//accptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(new TextLineCodecFactory(Charset.forName("UTF-8")) ));
-//		accptor.getFilterChain().addLast( "codec", new ProtocolCodecFilter( new TextLineCodecFactory( Charset.forName( "UTF-8" ))));
+		accptor.getFilterChain().addLast( "codec", new ProtocolCodecFilter( new TextLineCodecFactory( Charset.forName( "UTF-8" ))));
 		accptor.setDefaultLocalAddress(new InetSocketAddress(PORT));
 		accptor.getSessionConfig().setReadBufferSize(2048);
-		accptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, 30);
+		accptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, 100);
 		accptor.setHandler(new PackageHandler(queue));
 		try {
 			accptor.bind();
