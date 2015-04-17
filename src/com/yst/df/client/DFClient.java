@@ -26,7 +26,7 @@ public class DFClient implements Runnable {
 	@Override
 	public void run() {
 		NioSocketConnector connector = new NioSocketConnector();
-		connector.setConnectTimeoutMillis(300000);
+		connector.setConnectTimeoutMillis(30000000);
 		// connector.getSessionConfig().setIdleTime(IdleStatus.WRITER_IDLE, 5);
 		connector.getFilterChain().addLast("logger", new LoggingFilter());
 		connector.getFilterChain().addLast(
