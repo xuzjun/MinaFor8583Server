@@ -1,17 +1,18 @@
 package com.yst.df.client;
 
 import java.net.InetSocketAddress;
-import java.nio.charset.Charset;
 import java.util.concurrent.BlockingQueue;
 
 import org.apache.mina.core.future.ConnectFuture;
+import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
-import org.apache.mina.filter.codec.textline.TextLineCodecFactory;
 import org.apache.mina.filter.logging.LoggingFilter;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
 import com.yst.df.handler.ClientHandler;
+import com.yst.df.handler.MyIoListener;
+import com.yst.df.handler.ProtocolForCppServer;
 
 public class DFClient implements Runnable {
 
@@ -27,13 +28,17 @@ public class DFClient implements Runnable {
 	public void run() {
 		NioSocketConnector connector = new NioSocketConnector();
 		connector.setConnectTimeoutMillis(30000000);
-		// connector.getSessionConfig().setIdleTime(IdleStatus.WRITER_IDLE, 5);
 		connector.getFilterChain().addLast("logger", new LoggingFilter());
-		connector.getFilterChain().addLast(
-				"codec",
-				new ProtocolCodecFilter(new TextLineCodecFactory(Charset
-						.forName("UTF-8"))));
+		connector.getFilterChain().addLast("codec",
+				new ProtocolCodecFilter(new ProtocolForCppServer()));
 		connector.setHandler(new ClientHandler());
+		connector.addListener(new MyIoListener() {
+			@Override
+			public void sessionDestroyed(IoSession arg0) throws Exception {
+				super.sessionDestroyed(arg0);
+			}
+		});
+		connector.getSessionConfig().setIdleTime(IdleStatus.WRITER_IDLE, 60);
 		ConnectFuture cf = connector.connect(new InetSocketAddress(IP, PORT));
 		cf.awaitUninterruptibly();
 		IoSession session = cf.getSession();
@@ -45,7 +50,7 @@ public class DFClient implements Runnable {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			System.out.println("Client : " + (String)message);
+			System.out.println("Client : " + (String) message);
 			session.write("0000");
 		}
 	}

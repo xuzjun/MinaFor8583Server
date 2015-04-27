@@ -32,5 +32,10 @@ public class ClientHandler extends IoHandlerAdapter {
 	public void sessionIdle(IoSession session, IdleStatus status)
 			throws Exception {
 		System.out.println("Idle " + status.toString() + " " + session.isConnected());
+		byte[] bs = new byte[4];
+		for (int i = 0; i < bs.length; i++) {
+			bs[i] = 0x30;
+		}
+		session.write(bs);
 	}
 }
